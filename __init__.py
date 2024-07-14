@@ -123,6 +123,7 @@ def save_selected_objects_backup(context, objects, directory):
 
 # Operator for saving collection backup
 class OBJECT_OT_save_collection_backup(bpy.types.Operator):
+    '''Save selected collection as separate .blend file'''
     bl_idname = "object.save_collection_backup"
     bl_label = "Save Backup"
     
@@ -143,6 +144,7 @@ class OBJECT_OT_save_collection_backup(bpy.types.Operator):
 
 # Operator for saving selected objects backup
 class OBJECT_OT_save_selected_objects_backup(bpy.types.Operator):
+    '''Save selected objects as separate .blend file'''
     bl_idname = "object.save_selected_objects_backup"
     bl_label = "Save Backup"
     
