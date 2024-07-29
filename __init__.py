@@ -8,11 +8,13 @@ bl_info = {
     "author": "https://github.com/maqq1e",
     "description": "Easy and fast save separate objects and collection as backup .blend files",
     "blender": (4, 0, 0),
-    "version": (1, 0, 0),
+    "version": (1, 1, 0),
 }
 
 def create_unique_path(name, directory):
     
+    blendname = bpy.data.filepath[bpy.data.filepath.rfind('\\') + 1:-6]
+
     isFileExist = True
 
     number = 1
@@ -20,7 +22,7 @@ def create_unique_path(name, directory):
     while isFileExist:
         
         # Set the filename for the backup
-        backup_filename = f"Backups/{name} {number}.blend"
+        backup_filename = f"Backups/{blendname} - {name} {number}.blend"
 
         backup_filepath = os.path.join(directory, backup_filename)
 
@@ -29,6 +31,9 @@ def create_unique_path(name, directory):
             isFileExist = True
         else:
             return backup_filepath
+        
+def delete_unused_data():
+    bpy.data.orphans_purge()
         
 def move_objects_to_collection(objects, target_collection_name):
     # Ensure the target collection exists
@@ -70,6 +75,8 @@ def save_backup_WRAP(context, func, data):
         os.makedirs(directory + "\Backups")
 
     backup_filepath = func(context, data, directory)    
+    
+    delete_unused_data()
 
     # Create a new blend file for the backup
     bpy.ops.wm.save_as_mainfile(filepath=backup_filepath, copy=True)
