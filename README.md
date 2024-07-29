@@ -22,7 +22,7 @@ or just install single [python script](https://github.com/maqq1e/Save-as-Backup/
 
 ## Supports versions
 
-`Blender 4.0+`
+`Blender 3.6+`
 
 ## License
 MIT
