@@ -4,6 +4,9 @@
 
 ## Features
 - Save objects and collections as separate .blend file in `root/Backups` folder
+  - Now you can set custom backup folder name in preference panel
+    
+  ![alt text](https://github.com/user-attachments/assets/65afa62d-83d1-4964-b10b-cfc380184a6d)
 - Support cross-collection selection
 ## Usage
 Just open context menu in hierarchy for collection or selected objects and click on _Save Backup_ button 
