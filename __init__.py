@@ -1,4 +1,5 @@
 import bpy
+from bpy.props import StringProperty
 import os
 
 
@@ -7,11 +8,30 @@ bl_info = {
     "name": "Save as Backup",
     "author": "https://github.com/maqq1e",
     "description": "Easy and fast save separate objects and collection as backup .blend files",
-    "blender": (4, 0, 0),
-    "version": (1, 1, 0),
+    "blender": (3, 6, 0),
+    "version": (1, 2, 0),
 }
 
-def create_unique_path(name, directory):
+# Preferences Panel 
+class CubeCreatorSaverPreferences(bpy.types.AddonPreferences):
+    bl_idname = __name__
+
+    save_file_name: StringProperty(
+        name="Backup Folder Path",
+        description="NAme of folder to backup files",
+        default="Backups",
+    )
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "save_file_name")
+
+# Additional functions
+def create_unique_path(context, name, directory):
+
+    # Get the file name from the addon preferences
+    preferences = context.preferences.addons[__name__].preferences
+    file_name = preferences.save_file_name
     
     blendname = bpy.data.filepath[bpy.data.filepath.rfind('\\') + 1:-6]
 
@@ -22,7 +42,7 @@ def create_unique_path(name, directory):
     while isFileExist:
         
         # Set the filename for the backup
-        backup_filename = f"Backups/{blendname} - {name} {number}.blend"
+        backup_filename = f"{file_name}/{blendname} - {name} {number}.blend"
 
         backup_filepath = os.path.join(directory, backup_filename)
 
@@ -58,6 +78,8 @@ def move_objects_to_collection(objects, target_collection_name):
     
     return target_collection
 
+# Main functions
+
 def save_backup_WRAP(context, func, data):
     bpy.ops.wm.save_mainfile()
 
@@ -69,10 +91,14 @@ def save_backup_WRAP(context, func, data):
 
     # Get the directory of the current blend file
     directory = os.path.dirname(blend_filepath)
+
+    # Get the file name from the addon preferences
+    preferences = context.preferences.addons[__name__].preferences
+    file_name = preferences.save_file_name
     
     # Create path
-    if not os.path.exists(directory + "\Backups"):
-        os.makedirs(directory + "\Backups")
+    if not os.path.exists(directory + "\\" + file_name):
+        os.makedirs(directory + "\\" + file_name)
 
     backup_filepath = func(context, data, directory)    
     
@@ -86,7 +112,7 @@ def save_backup_WRAP(context, func, data):
 
 def save_collection_backup(context, collection, directory):
 
-    unique_path = create_unique_path(collection.name, directory)
+    unique_path = create_unique_path(context, collection.name, directory)
 
     new_collection_name = 'Backup - ' + collection.name
         
@@ -108,7 +134,7 @@ def save_collection_backup(context, collection, directory):
 
 def save_selected_objects_backup(context, objects, directory):
 
-    unique_path = create_unique_path(objects[0].name, directory)
+    unique_path = create_unique_path(context, objects[0].name, directory)
 
     new_collection_name = 'Backup - ' + objects[0].name
 
@@ -167,7 +193,6 @@ class OBJECT_OT_save_selected_objects_backup(bpy.types.Operator):
             self.report({'ERROR'}, f"You need to save you .blend file!")
             return {'FINISHED'}
 
-
 # Menu entry for the context menu
 def collection_func(self, context):
     layout = self.layout
@@ -185,12 +210,14 @@ def object_func(self, context):
 def register():
     bpy.utils.register_class(OBJECT_OT_save_collection_backup)
     bpy.utils.register_class(OBJECT_OT_save_selected_objects_backup)
+    bpy.utils.register_class(CubeCreatorSaverPreferences)
     bpy.types.OUTLINER_MT_collection.append(collection_func)
     bpy.types.OUTLINER_MT_object.append(object_func)
 
 def unregister():
     bpy.utils.unregister_class(OBJECT_OT_save_collection_backup)
     bpy.utils.unregister_class(OBJECT_OT_save_selected_objects_backup)
+    bpy.utils.unregister_class(CubeCreatorSaverPreferences)
     bpy.types.OUTLINER_MT_collection.remove(collection_func)
     bpy.types.OUTLINER_MT_object.remove(object_func)
 
